@@ -1,0 +1,143 @@
+
+
+ ###Bu adımları kullanma her kesin donanımı buna musade etmeyebilir.
+ ### sprint sonunda masterClaslar açıp testleri yapabilirsin
+ ### adımların kopyalanmadığından emin ol.
+ ### normal kullanici bu adımları kullanırsa kafa karışıklığı olur.
+ ### testleri gitmez.
+ ### sprint sonu her kes testlerini bitirince buradan adımları tekrar yaz.
+ ### !!!!!!!!******** Unutma her testin ilk adımına private driver koymak gerekiyor
+
+
+ @EnvirmentTest
+    Scenario:
+        * The master user creates the test environment.
+        * Kullanici uzerinde "Profile" yazan butona tiklar
+        * Kullanici uzerinde "Sign In" yazan butona tiklar
+        * Kullanici phoneBox kutusuna "1661676667" ile tanımlı telefon numarasini girer
+        * Kullanici passwordBox kutusuna "Query.2026!" degerini girer
+        * Kullanici "Sign In" yazan butona tiklar
+        * The master user shuts down resources.
+
+
+
+            @When("The master user creates the test environment.")
+            public void theMasterUserCreatesTheTestEnvironment() throws InterruptedException {
+
+                // 1. Önce sunucuyu başlatıyoruz (Buraya dikkat, static olarak doğrudan utils'den çağırın)
+                utils.AppiumServer.startServer(4723);
+
+                // 2. Emülatörü ayağa kaldırıyoruz
+                utils.EmulatorLauncher.launchEmulator();
+
+                // 3. Sistemlerin kendine gelmesi için emniyet beklemesi
+                Thread.sleep(5000);
+
+                logger.info("The master user creates the test environment.");
+
+                // 4. Sunucu ve cihaz hazır olduktan sonra EN SON driver'ı tetikliyoruz
+                utilities.Driver.getAppiumDriver();
+
+
+            }
+
+            @When("The master user shuts down resources.")
+            public void theMasterUserShutsDownResources() throws InterruptedException {
+
+                // Önce driver oturumunu kapatıyoruz, sonra sunucuyu durduruyoruz
+               // utilities.Driver.quitAppiumDriver();
+                utils.AppiumServer.stopServer();
+
+
+
+            }
+
+
+
+    package stepdefinitions;
+
+    import io.appium.java_client.android.AndroidDriver;
+    import io.cucumber.java.en.Given;
+    import io.cucumber.java.en.When;
+    import org.openqa.selenium.By;
+    import org.openqa.selenium.Keys;
+    import org.openqa.selenium.WebElement;
+    import org.openqa.selenium.interactions.Actions;
+    import utilities.ReusableMethods;
+    import utils.LoggerHelper;
+    import static page.HistoryPage.*;
+    import static utilities.Driver.getAppiumDriver;
+    import static utilities.OptionsMet.clickButtonByDescription;
+
+
+    public class US020_HistorySteps {
+
+         public static AndroidDriver driver = (AndroidDriver) getAppiumDriver();
+        // private AndroidDriver driver;  todo // envirment kurulumu istersen her testin header kısmına bunu koy ve ilk tıklama step için private driver tanimla
+
+        LoggerHelper logger = new LoggerHelper();
+
+        @Given("Kullanici test ortami olusturur")
+        public void kullanici_test_ortami_olusturur() {
+
+            getAppiumDriver();
+            ReusableMethods.wait(5);
+            logger.info("Kullanici test ortami olusturur");
+
+        }
+
+        @Given("Kullanici uzerinde {string} yazan butona tiklar")
+        public void kullanici_uzerinde_yazan_butona_tiklar(String buttonName) {
+
+            //driver = (AndroidDriver) Driver.getAppiumDriver();
+            // todo buttonIsmi belli ise tiklama
+            ReusableMethods.wait(3);
+            clickButtonByDescription(buttonName);
+            logger.info("Kullanici uzerinde " + " " + buttonName + " yazan butona tiklar");
+
+        }
+
+        @Given("Kullanici phoneBox kutusuna {string} ile tanımlı telefon numarasini girer")
+        public void kullanici_phone_box_kutusuna_ile_tanımlı_telefon_numarasini_girer(String phoneNumber) {
+
+            ReusableMethods.wait(3);
+            WebElement phoneBox = getAppiumDriver().findElement(By.xpath(phoneBoxXpath));
+            phoneBox.click();
+            phoneBox.clear();
+            phoneBox.sendKeys(phoneNumber);
+            logger.info("Kullanici phoneBox kutusuna " + phoneNumber + " ile tanımlı telefon numarasini girer");
+
+        }
+
+        @Given("Kullanici passwordBox kutusuna {string} degerini girer")
+        public void kullanici_password_box_kutusuna_degerini_girer(String password) {
+
+            Actions actions = new Actions(getAppiumDriver());
+            actions.sendKeys(Keys.TAB).perform();
+            actions.sendKeys(password).perform();
+            ReusableMethods.wait(1);
+            actions.sendKeys(Keys.TAB).perform();
+            logger.info("Kullanici passwordBox kutusuna " + password + " degerini girer");
+
+        }
+
+        @Given("Kullanici {string} yazan butona tiklar")
+        public void kullanici_yazan_butona_tiklar(String buttonName) {
+
+            ReusableMethods.wait(3);
+            WebElement signInButton = getAppiumDriver().findElement(By.xpath("(//android.view.View[@content-desc=\"Sign In\"])[2]"));
+            signInButton.click();
+            logger.info("Kullanici " + buttonName + " yazan butona tiklar");
+
+        }
+
+        @When("Kullanici {string} ve {string} degerleri ile giris yapar")
+        public void kullaniciVeDegerleriIleGirisYapar(String phoneNumber, String password ) {
+
+            loginWithPhoneNumber(phoneNumber, password);
+            logger.info("Kullanici " + phoneNumber + " ve " + password + " degerleri ile giris yapar");
+
+        }
+
+    }
+
